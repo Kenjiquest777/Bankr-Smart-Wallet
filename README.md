@@ -17,7 +17,7 @@ Smart wallet tracking and alpha intelligence system for Base Chain, Solana, and 
 
 ### 2. Manual Wallet Tracking & Custom Lists
 - **Manual Wallet Addition**: Add any EVM, Solana, or Robinhood wallet address directly to your tracker.
-- **Metadata Tagging**: Assign custom labels, categorize by wallet type (`whale`, `kol`), link Twitter/@X handles, and assign to specific lists.
+- **Metadata Tagging**: Assign custom labels, categorize by wallet type (`early_buyers`, `dex_traders`, `kol_wallets`, `whales`), link Twitter/@X handles, and assign to specific lists.
 - **Custom List Management**: Create, view, and delete custom lists to segment wallets by strategy, alpha caller, or portfolio theme.
 - **Feed Filtering**: Instantly toggle feed views between `All Wallets`, `Tracked Only`, or filter by individual custom lists.
 - **Priority Background Scans**: Tracked wallets are placed at the top of the queue and scanned first on every automated refresh cycle.
@@ -26,6 +26,23 @@ Smart wallet tracking and alpha intelligence system for Base Chain, Solana, and 
 - Scheduled background scanning script (`refreshSignals`) running periodically to capture on-chain transactions.
 - Live price enrichment via DexScreener API (`enrichPrices`).
 - Real-time notification routing directly to Telegram DM.
+
+## Configuration
+
+Tracker behavior is driven by `config/tracker-config.json`:
+
+```json
+{
+  "targetChains": ["base", "robinhood"],
+  "sampleTokens": [
+    { "symbol": "BASECAT", "chain": "base", "address": "0xb2000000000000000000004c27f6523082f41d01" }
+  ],
+  "notifications": {
+    "telegram": { "type": "direct_dm", "status": "active" }
+  },
+  "walletTypes": ["early_buyers", "dex_traders", "kol_wallets", "whales"]
+}
+```
 
 ## Data Schemas & AppKV Keys
 
