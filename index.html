@@ -1,0 +1,423 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Wallet Tracker</title>
+<style>
+:root{--bg:#06080b;--panel:#0c1017;--panel2:#10151f;--line:#1b2331;--txt:#dbe4ef;--dim:#6d7c94;--faint:#46536a;--amber:#ffb020;--green:#2fd47a;--red:#ff4d5e;--blue:#4c8dff;--purple:#9d7bff;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font:13px/1.45 ui-monospace,'SF Mono',Menlo,Consolas,monospace;padding:14px;}
+.hd{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.hd h1{font-size:16px;letter-spacing:2px;color:#fff}
+.hd h1 span{color:var(--amber)}
+.hd .sub{color:var(--dim);font-size:11px;margin-top:2px}
+.hd .right{display:flex;align-items:center;gap:8px}
+#updated{color:var(--faint);font-size:11px}
+button{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font:inherit;padding:6px 12px;border-radius:6px;cursor:pointer}
+button:hover{border-color:var(--amber);color:var(--amber)}
+button:disabled{opacity:.5;cursor:wait}
+.bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{background:transparent;border:1px solid var(--line);color:var(--dim);padding:4px 10px;border-radius:99px;font-size:11px;cursor:pointer}
+.chip.on{border-color:var(--amber);color:var(--amber);background:rgba(255,176,32,.08)}
+.sect{color:var(--faint);font-size:10px;letter-spacing:2px;margin:14px 0 8px}
+.sect.hotlbl{color:var(--amber)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;position:relative;overflow:hidden}
+.card.vstrong{border-color:var(--amber);box-shadow:0 0 0 1px rgba(255,176,32,.35),0 0 24px rgba(255,176,32,.12);background:linear-gradient(180deg,rgba(255,176,32,.06),var(--panel) 55%)}
+.card.strong{border-color:rgba(47,212,122,.55);box-shadow:0 0 14px rgba(47,212,122,.08)}
+.ribbon{position:absolute;top:0;right:0;font-size:9px;letter-spacing:1.5px;padding:3px 10px;border-radius:0 8px 0 8px;font-weight:700}
+.ribbon.vs{background:var(--amber);color:#100a00;animation:pulse 1.6s ease-in-out infinite}
+.ribbon.st{background:rgba(47,212,122,.16);color:var(--green);border:1px solid rgba(47,212,122,.4);border-top:0;border-right:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.wname{color:#fff;font-weight:700}
+.xlink{color:var(--blue);cursor:pointer;text-decoration:none;font-size:12px}
+.xlink:hover{text-decoration:underline}
+.tag{font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--dim)}
+.tag.whale{color:var(--blue);border-color:rgba(76,141,255,.4)}
+.tag.kol{color:var(--purple);border-color:rgba(157,123,255,.4)}
+.tag.bundle{color:var(--amber);border-color:rgba(255,176,32,.45)}
+.ago{margin-left:auto;color:var(--faint);font-size:11px;white-space:nowrap}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.tok{color:#fff;font-weight:700}
+.tok .sym{color:var(--amber)}
+.chainb{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:2px 8px 2px 3px}
+.chainb svg{width:14px;height:14px;display:block}
+.ca{color:var(--faint);font-size:11px;cursor:pointer}
+.ca:hover{color:var(--txt)}
+.stats{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px}
+.stat .k{color:var(--faint);font-size:9px;letter-spacing:1px}
+.stat .v{color:var(--txt);font-size:13px;font-weight:700}
+.stat .v.big{color:var(--green)}
+.stat .v small{color:var(--dim);font-weight:400}
+.up{color:var(--green)}.dn{color:var(--red)}
+.react{color:var(--dim);font-size:11.5px;border-left:2px solid var(--line);padding-left:8px;margin-bottom:8px;font-style:italic}
+.riskrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:5px}
+.pill.BUY{background:rgba(47,212,122,.14);color:var(--green);border:1px solid rgba(47,212,122,.4)}
+.pill.WATCH{background:rgba(255,176,32,.12);color:var(--amber);border:1px solid rgba(255,176,32,.4)}
+.pill.AVOID{background:rgba(255,77,94,.12);color:var(--red);border:1px solid rgba(255,77,94,.4)}
+.rbarwrap{flex:1;min-width:130px;display:flex;align-items:center;gap:8px}
+.rbar{flex:1;height:6px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.rbar i{display:block;height:100%;border-radius:99px}
+.rpct{font-size:11px;font-weight:700;white-space:nowrap}
+.rexp{width:100%;color:var(--dim);font-size:11px;margin-top:4px}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--dim)}
+.err{color:var(--red);font-size:11px;margin-bottom:10px}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--amber);color:#100a00;font-weight:700;padding:8px 16px;border-radius:8px;font-size:12px;display:none;z-index:9}
+.foot{color:var(--faint);font-size:10px;margin-top:14px}
+.tag.trk{color:var(--green);border-color:rgba(47,212,122,.45)}
+input,select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);font:inherit;padding:6px 8px;border-radius:6px;outline:none}
+input:focus,select:focus{border-color:var(--amber)}
+.wlgrid{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.wlgrid input{min-width:120px}
+#wf-addr{flex:1 1 220px;min-width:220px}
+.wlrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:12px}
+.delw{margin-left:auto;color:var(--faint);cursor:pointer;font-size:14px;padding:0 4px}
+.delw:hover{color:var(--red)}
+.delx{color:var(--faint);cursor:pointer;padding:0 2px}
+.delx:hover{color:var(--red)}
+#nlform{display:none;gap:6px;margin-bottom:10px}
+.secthead{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:10px;letter-spacing:2px;margin:14px 0 8px}
+.secthead .chip{letter-spacing:0}
+</style>
+</head>
+<body>
+<div class="hd">
+  <div>
+    <h1>SMART WALLET <span>TRACKER</span></h1>
+    <div class="sub">whales + kol high-signal buyers &middot; base / solana / robinhood</div>
+  </div>
+  <div class="right"><span id="updated"></span><button id="refresh">refresh</button></div>
+</div>
+<div class="bar" id="chainbar">
+  <button class="chip on" data-c="all">all chains</button>
+  <button class="chip" data-c="base">base</button>
+  <button class="chip" data-c="solana">solana</button>
+  <button class="chip" data-c="robinhood">robinhood</button>
+</div>
+<div class="bar" id="strbar">
+  <button class="chip on" data-s="all">all signals</button>
+  <button class="chip" data-s="very_strong">very strong</button>
+  <button class="chip" data-s="strong">strong+</button>
+  <button class="chip" data-s="BUY">buys only</button>
+</div>
+<div class="secthead">TRACKED WALLETS<button class="chip" id="wladd">+ add wallet</button><button class="chip" id="wlnewlist">+ new list</button></div>
+<div id="nlform"><input id="nl-name" placeholder="new list name"><button id="nl-save">create list</button></div>
+<div id="wlform" class="card" style="display:none">
+  <div class="wlgrid">
+    <input id="wf-addr" placeholder="wallet address (0x… / solana)">
+    <input id="wf-label" placeholder="label / name">
+    <select id="wf-chain"><option value="base">base</option><option value="solana">solana</option><option value="robinhood">robinhood</option></select>
+    <select id="wf-type"><option value="whale">whale</option><option value="kol">kol</option></select>
+    <input id="wf-tw" placeholder="twitter (optional)">
+    <select id="wf-list"><option value="">(no list)</option></select>
+    <button id="wf-save">track wallet</button>
+  </div>
+  <div id="wf-err" class="err" style="margin:6px 0 0"></div>
+</div>
+<div class="bar" id="listbar"></div>
+<div id="wlrows"></div>
+<div id="errbox"></div>
+<div id="hotwrap"></div>
+<div class="sect">SIGNAL FEED</div>
+<div id="feed"><div class="empty">loading signals…</div></div>
+<div class="foot">background agent scan runs on a schedule and writes fresh signals automatically &middot; refresh re-reads the latest snapshot with live market caps &middot; not financial advice</div>
+<div id="toast"></div>
+<script>
+var snap = { signals: [], updatedAt: 0 };
+var prices = {};
+var fChain = 'all', fStr = 'all';
+var STRRANK = { very_strong: 3, strong: 2, moderate: 1, weak: 0 };
+
+var LOGOS = {
+  base: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#0052FF"/><path d="M8 13.4A5.4 5.4 0 1 0 8 2.6a5.4 5.4 0 0 0-5.37 4.8H9.7v1.2H2.63A5.4 5.4 0 0 0 8 13.4z" fill="#fff"/></svg>',
+  solana: '<svg viewBox="0 0 16 16"><rect width="16" height="16" rx="8" fill="#0e0e17"/><path d="M5 4.6h7.2L10.7 6H3.5z" fill="#00FFA3"/><path d="M5 7.3h7.2L10.7 8.7H3.5z" fill="#7A7CFF"/><path d="M5 10h7.2l-1.5 1.4H3.5z" fill="#DC1FFF"/></svg>',
+  robinhood: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="8" fill="#0d2418"/><path d="M11 3.4c-1.7.1-3.2.9-4.1 2.2-.9 1.2-1.5 2.9-1.9 5.8l-.2 1.2 1.1-.8c.6-.5 1.3-1.1 1.8-1.7 1.5-1.7 2.7-4 3.5-6.2l.2-.6z" fill="#c5f96c"/></svg>'
+};
+var CHNAME = { base: 'Base', solana: 'Solana', robinhood: 'Robinhood' };
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(n){ if(n==null||isNaN(n)||n===0) return '—'; n=Number(n);
+  if(n>=1e9) return '$'+(n/1e9).toFixed(2)+'B'; if(n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
+  if(n>=1e3) return '$'+(n/1e3).toFixed(1)+'K'; return '$'+n.toFixed(0); }
+function ago(ts){ if(!ts) return ''; var d=Math.max(0,Math.floor((Date.now()-ts)/1000));
+  if(d<60) return d+'s ago'; if(d<3600) return Math.floor(d/60)+'m ago';
+  if(d<86400) return Math.floor(d/3600)+'h '+Math.floor((d%3600)/60)+'m ago'; return Math.floor(d/86400)+'d ago'; }
+function shortca(a){ a=String(a||''); return a.length>14 ? a.slice(0,6)+'…'+a.slice(-5) : a; }
+function riskColor(p){ return p>=60 ? 'var(--red)' : (p>=35 ? 'var(--amber)' : 'var(--green)'); }
+
+function card(s, hot){
+  var str = s.signalStrength || 'moderate';
+  var cls = str==='very_strong' ? 'vstrong' : (str==='strong' ? 'strong' : '');
+  var ribbon = str==='very_strong' ? '<div class="ribbon vs">★ VERY STRONG BUY</div>' : (str==='strong' ? '<div class="ribbon st">STRONG SIGNAL</div>' : '');
+  var live = prices[String(s.tokenCA||'').toLowerCase()];
+  var risk = Math.max(0, Math.min(100, Number(s.dumpRiskPct)||0));
+  var wt = (s.walletType==='kol') ? 'kol' : 'whale';
+  var h = '<div class="card '+cls+'" data-ca="'+esc(s.tokenCA)+'">'+ribbon;
+  h += '<div class="row1"><span class="wname">'+esc(s.walletName||'unknown wallet')+'</span>';
+  if(s.twitter) h += '<a class="xlink" data-x="'+esc(s.twitter)+'">@'+esc(s.twitter)+'</a>';
+  h += '<span class="tag '+wt+'">'+wt.toUpperCase()+'</span>';
+  if(isTracked(s)) h += '<span class="tag trk">★ TRACKED</span>';
+  if(s.bundled) h += '<span class="tag bundle" title="'+esc(s.bundleNote||'')+'">⛓ BUNDLED</span>';
+  h += '<span class="ago" data-ts="'+(Number(s.boughtAt)||0)+'">'+ago(Number(s.boughtAt))+'</span></div>';
+  h += '<div class="row2"><span class="tok">'+esc(s.tokenName||'?')+' <span class="sym">$'+esc(s.tokenSymbol||'?')+'</span></span>';
+  h += '<span class="chainb">'+(LOGOS[s.chain]||'')+' '+esc(CHNAME[s.chain]||s.chain)+'</span>';
+  h += '<span class="ca" data-copy="'+esc(s.tokenCA)+'" title="click to copy CA">'+esc(shortca(s.tokenCA))+' ⧉</span>';
+  if(live && live.url) h += '<a class="xlink" data-url="'+esc(live.url)+'">chart</a>';
+  h += '</div>';
+  h += '<div class="stats">';
+  h += '<div class="stat"><div class="k">BUY SIZE</div><div class="v big">'+(Number(s.buySizeUsd)>0?money(s.buySizeUsd):'<span style="color:var(--dim);font-weight:400">unsized</span>')+'</div></div>';
+  h += '<div class="stat"><div class="k">MCAP @ BUY</div><div class="v">'+money(s.mcapAtBuy)+'</div></div>';
+  h += '<div class="stat"><div class="k">MCAP NOW</div><div class="v">'+(live&&live.mcap?money(live.mcap):'—')+'</div></div>';
+  if(live && live.ch1!=null && !isNaN(live.ch1)) h += '<div class="stat"><div class="k">1H</div><div class="v '+(live.ch1>=0?'up':'dn')+'">'+(live.ch1>=0?'+':'')+live.ch1+'%</div></div>';
+  if(live && live.ch24!=null && !isNaN(live.ch24)) h += '<div class="stat"><div class="k">24H</div><div class="v '+(live.ch24>=0?'up':'dn')+'">'+(live.ch24>=0?'+':'')+live.ch24+'%</div></div>';
+  h += '</div>';
+  if(s.bundled && s.bundleNote) h += '<div class="react">bundle: '+esc(s.bundleNote)+'</div>';
+  if(s.reaction) h += '<div class="react">'+esc(s.reaction)+'</div>';
+  h += '<div class="riskrow"><span class="pill '+esc(s.action||'WATCH')+'">'+esc(s.action||'WATCH')+'</span>';
+  h += '<div class="rbarwrap"><span class="rpct" style="color:'+riskColor(risk)+'">dump risk '+risk+'%</span><div class="rbar"><i style="width:'+risk+'%;background:'+riskColor(risk)+'"></i></div></div>';
+  if(s.riskExplanation) h += '<div class="rexp">'+esc(s.riskExplanation)+'</div>';
+  h += '</div></div>';
+  return h;
+}
+
+function filtered(){
+  var list = Array.isArray(snap.signals) ? snap.signals.slice() : [];
+  if(fChain!=='all') list = list.filter(function(s){return s.chain===fChain;});
+  if(fStr==='very_strong') list = list.filter(function(s){return s.signalStrength==='very_strong';});
+  else if(fStr==='strong') list = list.filter(function(s){return STRRANK[s.signalStrength]>=2;});
+  else if(fStr==='BUY') list = list.filter(function(s){return s.action==='BUY';});
+  if(fList==='tracked'){ var tm = trackedMap(); list = list.filter(function(s){ return s.walletAddress && tm[String(s.walletAddress).toLowerCase()]; }); }
+  else if(fList!=='all'){ var ids = {}; (watch.wallets||[]).forEach(function(w){ if(w.listId===fList) ids[String(w.address).toLowerCase()]=1; }); list = list.filter(function(s){ return s.walletAddress && ids[String(s.walletAddress).toLowerCase()]; }); }
+  return list;
+}
+
+function render(){
+  var list = filtered();
+  var hot = list.filter(function(s){return STRRANK[s.signalStrength||'']>=2;})
+    .sort(function(a,b){return (STRRANK[b.signalStrength]||0)-(STRRANK[a.signalStrength]||0) || (b.boughtAt||0)-(a.boughtAt||0);});
+  var rest = list.filter(function(s){return STRRANK[s.signalStrength||'']<2;})
+    .sort(function(a,b){return (b.boughtAt||0)-(a.boughtAt||0);});
+  var hw = document.getElementById('hotwrap');
+  hw.innerHTML = hot.length ? '<div class="sect hotlbl">▲ HIGH CONVICTION — STRONG & VERY STRONG</div>'+hot.map(function(s){return card(s,true);}).join('') : '';
+  var feed = document.getElementById('feed');
+  if(!list.length){
+    feed.innerHTML = '<div class="empty">'+(snap.updatedAt ? 'no signals match these filters' : 'no signals yet — the first background agent scan will populate this shortly. hit refresh in a few minutes.')+'</div>';
+  } else {
+    feed.innerHTML = rest.length ? rest.map(function(s){return card(s,false);}).join('') : '<div class="empty">all current signals are high conviction ↑</div>';
+  }
+  var u = document.getElementById('updated');
+  u.textContent = snap.updatedAt ? 'scan: '+ago(snap.updatedAt) : '';
+  u.setAttribute('data-uts', snap.updatedAt||0);
+}
+
+async function enrich(){
+  var cas = []; var seen = {};
+  (snap.signals||[]).forEach(function(s){ if(s.tokenCA && !seen[s.tokenCA]){ seen[s.tokenCA]=1; cas.push(s.tokenCA);} });
+  if(!cas.length) return;
+  try{
+    var r = await bankr.invokeScript('enrichPrices', { tokens: cas });
+    prices = (r && r.prices) || {};
+    render();
+  }catch(e){ /* live prices optional */ }
+}
+
+async function load(manual){
+  var btn = document.getElementById('refresh');
+  if(manual){ btn.disabled = true; btn.textContent = '…'; }
+  document.getElementById('errbox').innerHTML = '';
+  try{
+    var s = await bankr.appKV.get('signals_snapshot');
+    if(s && Array.isArray(s.signals)) snap = s;
+    render();
+    enrich();
+  }catch(e){
+    document.getElementById('errbox').innerHTML = '<div class="err">failed to load: '+esc(e && e.message || e)+'</div>';
+  }
+  if(manual){ btn.disabled = false; btn.textContent = 'refresh'; }
+}
+
+function toast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  setTimeout(function(){ t.style.display = 'none'; }, 4000);
+}
+
+document.getElementById('refresh').addEventListener('click', function(){ load(true); loadWatch(); });
+document.getElementById('chainbar').addEventListener('click', function(e){
+  var b = e.target.closest('.chip'); if(!b) return;
+  fChain = b.getAttribute('data-c');
+  this.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('on', c===b);});
+  render();
+});
+document.getElementById('strbar').addEventListener('click', function(e){
+  var b = e.target.closest('.chip'); if(!b) return;
+  fStr = b.getAttribute('data-s');
+  this.querySelectorAll('.chip').forEach(function(c){c.classList.toggle('on', c===b);});
+  render();
+});
+document.body.addEventListener('click', function(e){
+  var cp = e.target.closest('[data-copy]');
+  if(cp){ bankr.copy(cp.getAttribute('data-copy')); cp.textContent = 'copied ✓'; setTimeout(function(){render();renderWatch();}, 1200); return; }
+  var x = e.target.closest('[data-x]');
+  if(x){ bankr.openExternal('https://x.com/'+x.getAttribute('data-x')); return; }
+  var u = e.target.closest('[data-url]');
+  if(u){ bankr.openExternal(u.getAttribute('data-url')); return; }
+});
+
+setInterval(function(){
+  document.querySelectorAll('.ago[data-ts]').forEach(function(el){
+    var ts = Number(el.getAttribute('data-ts')); if(ts) el.textContent = ago(ts);
+  });
+  var u = document.getElementById('updated');
+  var uts = Number(u.getAttribute('data-uts')); if(uts) u.textContent = 'scan: '+ago(uts);
+}, 1000);
+
+setInterval(async function(){
+  try{
+    var s = await bankr.appKV.get('signals_snapshot');
+    if(s && s.updatedAt && s.updatedAt > (snap.updatedAt||0)){
+      snap = s; render(); enrich();
+      toast('new signals landed — feed updated');
+    }
+  }catch(e){}
+}, 90000);
+
+var watch = { wallets: [], lists: [], updatedAt: 0 };
+var fList = 'all';
+
+function trackedMap(){
+  var m = {};
+  (watch.wallets||[]).forEach(function(w){ if(w && w.address) m[String(w.address).toLowerCase()] = w; });
+  return m;
+}
+function isTracked(s){
+  if(!s || !s.walletAddress) return false;
+  return !!trackedMap()[String(s.walletAddress).toLowerCase()];
+}
+function uid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function listName(id){
+  var l = (watch.lists||[]).filter(function(x){return x.id===id;})[0];
+  return l ? l.name : '';
+}
+
+async function loadWatch(){
+  try{
+    var w = await bankr.appKV.get('watchlists');
+    if(w && Array.isArray(w.wallets) && Array.isArray(w.lists)) watch = w;
+  }catch(e){}
+  renderWatch();
+}
+async function saveWatch(){
+  watch.wallets = watch.wallets || [];
+  watch.lists = watch.lists || [];
+  watch.updatedAt = Date.now();
+  try{ await bankr.appKV.set('watchlists', watch); }
+  catch(e){ toast('save failed: ' + (e && e.message || e)); }
+  renderWatch(); render();
+}
+function renderWatch(){
+  var lb = document.getElementById('listbar');
+  var h = '<button class="chip'+(fList==='all'?' on':'')+'" data-l="all">all wallets</button>';
+  h += '<button class="chip'+(fList==='tracked'?' on':'')+'" data-l="tracked">tracked only</button>';
+  (watch.lists||[]).forEach(function(l){
+    h += '<button class="chip'+(fList===l.id?' on':'')+'" data-l="'+esc(l.id)+'">'+esc(l.name)+' <span class="delx" data-dellist="'+esc(l.id)+'" title="delete list">×</span></button>';
+  });
+  lb.innerHTML = h;
+  var sel = document.getElementById('wf-list');
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">(no list)</option>' + (watch.lists||[]).map(function(l){return '<option value="'+esc(l.id)+'">'+esc(l.name)+'</option>';}).join('');
+  sel.value = cur;
+  var rows = document.getElementById('wlrows');
+  if(!(watch.wallets||[]).length){
+    rows.innerHTML = '<div class="empty" style="padding:14px">no wallets tracked yet — hit + add wallet and the scanner will watch it on every scan</div>';
+    return;
+  }
+  rows.innerHTML = watch.wallets.map(function(w){
+    var r = '<div class="wlrow">';
+    r += '<span class="wname">'+esc(w.label||'unlabeled')+'</span>';
+    r += '<span class="ca" data-copy="'+esc(w.address)+'" title="click to copy">'+esc(shortca(w.address))+' ⧉</span>';
+    r += '<span class="chainb">'+(LOGOS[w.chain]||'')+' '+esc(CHNAME[w.chain]||w.chain)+'</span>';
+    r += '<span class="tag '+(w.type==='kol'?'kol':'whale')+'">'+esc((w.type||'whale').toUpperCase())+'</span>';
+    if(w.twitter) r += '<a class="xlink" data-x="'+esc(w.twitter)+'">@'+esc(w.twitter)+'</a>';
+    if(w.listId && listName(w.listId)) r += '<span class="tag">'+esc(listName(w.listId))+'</span>';
+    r += '<span class="delw" data-delw="'+esc(w.id)+'" title="untrack wallet">×</span>';
+    r += '</div>';
+    return r;
+  }).join('');
+}
+
+document.getElementById('wladd').addEventListener('click', function(){
+  var f = document.getElementById('wlform');
+  f.style.display = (f.style.display==='none') ? 'block' : 'none';
+  if(f.style.display==='block') document.getElementById('wf-addr').focus();
+});
+document.getElementById('wlnewlist').addEventListener('click', function(){
+  var f = document.getElementById('nlform');
+  f.style.display = (f.style.display==='flex') ? 'none' : 'flex';
+  if(f.style.display==='flex') document.getElementById('nl-name').focus();
+});
+document.getElementById('nl-save').addEventListener('click', async function(){
+  var name = document.getElementById('nl-name').value.trim();
+  if(!name) return;
+  if((watch.lists||[]).some(function(l){return l.name.toLowerCase()===name.toLowerCase();})){ toast('list already exists'); return; }
+  watch.lists = watch.lists || [];
+  watch.lists.push({ id: uid('l'), name: name, createdAt: Date.now() });
+  document.getElementById('nl-name').value = '';
+  document.getElementById('nlform').style.display = 'none';
+  await saveWatch();
+  toast('list created');
+});
+document.getElementById('wf-save').addEventListener('click', async function(){
+  var errEl = document.getElementById('wf-err');
+  errEl.textContent = '';
+  var addr = document.getElementById('wf-addr').value.trim();
+  var chain = document.getElementById('wf-chain').value;
+  var okEvm = /^0x[0-9a-fA-F]{40}$/.test(addr);
+  var okSol = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+  if(chain==='solana' ? !okSol : !okEvm){ errEl.textContent = chain==='solana' ? 'enter a valid solana address' : 'enter a valid 0x address (40 hex chars)'; return; }
+  if((watch.wallets||[]).some(function(w){return w.address.toLowerCase()===addr.toLowerCase() && w.chain===chain;})){ errEl.textContent = 'already tracking this wallet on '+chain; return; }
+  watch.wallets = watch.wallets || [];
+  watch.wallets.push({
+    id: uid('w'),
+    address: addr,
+    label: document.getElementById('wf-label').value.trim() || shortca(addr),
+    chain: chain,
+    type: document.getElementById('wf-type').value,
+    twitter: document.getElementById('wf-tw').value.trim().replace(/^@/,''),
+    listId: document.getElementById('wf-list').value,
+    addedAt: Date.now()
+  });
+  ['wf-addr','wf-label','wf-tw'].forEach(function(id){ document.getElementById(id).value=''; });
+  await saveWatch();
+  toast('wallet tracked — next scan will check it first');
+});
+document.getElementById('listbar').addEventListener('click', async function(e){
+  var d = e.target.closest('[data-dellist]');
+  if(d){
+    e.stopPropagation();
+    var lid = d.getAttribute('data-dellist');
+    watch.lists = (watch.lists||[]).filter(function(l){return l.id!==lid;});
+    (watch.wallets||[]).forEach(function(w){ if(w.listId===lid) w.listId=''; });
+    if(fList===lid) fList='all';
+    await saveWatch();
+    return;
+  }
+  var b = e.target.closest('.chip'); if(!b) return;
+  fList = b.getAttribute('data-l');
+  renderWatch(); render();
+});
+document.getElementById('wlrows').addEventListener('click', async function(e){
+  var d = e.target.closest('[data-delw]');
+  if(!d) return;
+  var wid = d.getAttribute('data-delw');
+  watch.wallets = (watch.wallets||[]).filter(function(w){return w.id!==wid;});
+  await saveWatch();
+  toast('wallet untracked');
+});
+
+bankr.on('ready', function(){ load(false); loadWatch(); });
+</script>
+</body>
+</html>
