@@ -1,0 +1,41 @@
+{
+  "slug": "smart-wallet-tracker",
+  "title": "Smart Wallet Tracker",
+  "description": "Tracks whale wallets and high-signal KOL buyers across Base, Solana, and Robinhood Chain. Shows who bought, their Twitter identity, buy size, entry market cap, token CA, chain, time ago, bundled-buy flags, CT reaction, and a dump-risk % breakdown. High-conviction signals are surfaced in a dedicated strip. Supports manual wallet tracking with custom lists — tracked wallets are checked first on every background scan, and the feed can be filtered to a list or to tracked wallets only.",
+  "visibility": "private",
+  "version": 8,
+  "permissions": [
+    "read:appdata",
+    "write:appdata",
+    "invoke:agent",
+    "fetch:http"
+  ],
+  "scripts": [
+    "refreshSignals",
+    "enrichPrices",
+    "seedBasecatWallets"
+  ],
+  "publicScripts": [],
+  "publicScriptLimits": [],
+  "assets": [],
+  "publicDataKeys": [],
+  "secrets": [],
+  "schedule": [
+    {
+      "cron": "10 */5 * * *",
+      "enabled": true,
+      "script": "refreshSignals"
+    }
+  ],
+  "tags": [
+    "wallets",
+    "whale",
+    "tracker",
+    "signals",
+    "base",
+    "solana",
+    "robinhood"
+  ],
+  "frontendIdentity": "owner",
+  "dataSchemas": []
+}
